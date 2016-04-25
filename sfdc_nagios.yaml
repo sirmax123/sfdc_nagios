@@ -1,6 +1,7 @@
-sfdc_client_id: 'XXXXXX'
-sfdc_client_secret: XXXXX
-sfdc_username: 'userr@domain.com'
-sfdc_password: 'password'
-sfdc_auth_url: 'https://some-domain-example.my.salesforce.com/'
+sfdc_client_id: '<client id>'
+sfdc_client_secret: <user secret>
+sfdc_username: 'user name>'
+sfdc_password: '<password>'
+sfdc_auth_url: '< auth url. E.g. https://sdomeurlmy.salesforce.com/ >'
+environment: < Id of cloud in SFDC, e.g. a2X540000001234567 >
 

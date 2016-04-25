@@ -2,6 +2,8 @@ import requests
 import json
 
 
+requests.packages.urllib3.disable_warnings()
+
 class OAuth2(object):
     def __init__(self, client_id, client_secret, username, password, auth_url=None):
         if not auth_url:
@@ -25,7 +27,6 @@ class OAuth2(object):
         url = '{}/services/oauth2/token'.format(self.auth_url)
         response = requests.post(url, data=data)
         response.raise_for_status()
-
         return response.json()
 
 
@@ -38,12 +39,19 @@ class Client(object):
 
     def ticket(self, id):
         try:
-            return self.get('/services/data/v35.0/sobjects/proxyTicket__c/{}'.format(id)).json()
+            return self.get('/services/data/v36.0/sobjects/proxyTicket__c/{}'.format(id)).json()
         except requests.HTTPError:
             return False
 
     def create_mos_alert(self, data):
-        return self.post('/services/data/v36.0/sobjects/MOS_Alerts__c', json=data).json()
+        return self.post('/services/data/v36.0/sobjects/MOS_Alerts__c', json=data)
+
+    def create_mos_alert_comment(self, data):
+        return self.post('/services/data/v36.0/sobjects/MOS_Alert_Comment__c', json=data)
+
+
+    def create_case(self, data):
+        return self.post('/services/data/v36.0/sobjects/Case', json=data).json()
 
 
     def create_ticket(self, data):
@@ -52,17 +60,24 @@ class Client(object):
     def get_case(self, id):
         return self.get('/services/data/v36.0/sobjects/Case/{}'.format(id))
 
+    def get_mos_alert(self, id):
+        return self.get('/services/data/v36.0/sobjects/MOS_Alerts__c/{}'.format(id))
+
     def update_ticket(self, id, data):
-        return self.patch('/services/data/v35.0/sobjects/proxyTicket__c/{}'.format(id), json=data)
+        return self.patch('/services/data/v36.0/sobjects/proxyTicket__c/{}'.format(id), json=data)
+
+    def update_mos_alert(self, id, data):
+        return self.patch('/services/data/v36.0/sobjects/MOS_Alerts__c/{}'.format(id), json=data)
+
 
     def update_comment(self, id, data):
-        return self.patch('/services/data/v35.0/sobjects/proxyTicketComment__c/{}'.format(id), json=data)
+        return self.patch('/services/data/v36.0/sobjects/proxyTicketComment__c/{}'.format(id), json=data)
 
     def create_ticket_comment(self, data):
-        return self.post('/services/data/v35.0/sobjects/proxyTicketComment__c', json=data).json()
+        return self.post('/services/data/v36.0/sobjects/proxyTicketComment__c', json=data).json()
 
     def environment(self, id):
-        return self.get('/services/data/v35.0/sobjects/Environment__c/{}'.format(id)).json()
+        return self.get('/services/data/v36.0/sobjects/Environment__c/{}'.format(id)).json()
 
     def ticket_comments(self, ticket_id):
         return self.search("SELECT Comment__c, CreatedById, external_id__c, Id, CreatedDate, createdby.name "
@@ -70,7 +85,7 @@ class Client(object):
                            "WHERE related_id__c='{}'".format(ticket_id))
 
     def ticket_comment(self, comment_id):
-        return self.get('/services/data/v35.0/query',
+        return self.get('/services/data/v36.0/query',
                         params=dict(q="SELECT Comment__c, CreatedById, Id "
                                       "FROM proxyTicketComment__c "
                                       "WHERE external_id__c='{}'".format(comment_id))).json()
@@ -112,9 +127,13 @@ class Client(object):
         url = self.instance_url + url
 
         response = requests.request(method, url, headers=headers, **kwargs)
-#	print(response.status_code)
-#	print(response.headers['content-type'])
-#	print(json.dumps(response.json(),sort_keys=True, indent=4, separators=(',', ': ') ) )
-        response.raise_for_status()
+
+# Debug only
+#        print(response.status_code)
+#        try:
+#          print(json.dumps(response.json(),sort_keys=True, indent=4, separators=(',', ': ') ) )
+#        except Exception:
+#           print(response.content)
+#        response.raise_for_status()
 
         return response
