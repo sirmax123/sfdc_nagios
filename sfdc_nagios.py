@@ -112,11 +112,11 @@ def main():
     environment = config['environment']
 
 # Alert ID shoud be uniq for env
-    Alert_ID = environment + '--' + args.host_name
+    Alert_ID =  '{}--{}'.format(environment,args.host_name)
 
     if args.service_description:
         nagios_data['service_description'] = args.service_description
-        Alert_ID = Alert_ID + '--' + args.service_description
+        Alert_ID = '{}--{}'.format(Alert_ID, args.service_description)
 
     LOG.debug('Alert_Id: {} '.format(Alert_ID))
 
