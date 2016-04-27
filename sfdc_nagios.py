@@ -134,6 +134,7 @@ def main():
     data = {
         'Payload__c':  json.dumps(nagios_data),
         'Alert_ID__c': Alert_ID,
+        'Cloud__c':    environment,
         }
 
     comment_data = {
@@ -141,7 +142,8 @@ def main():
         'Comment__c':        json.dumps(nagios_data),
         'Alert_Id__c':       Alert_ID,
         'MOS_Alert_Name__c': "MA-0" ,
-        'MosAlertId__c':     "-1"
+        'MosAlertId__c':     "-1",
+        'Cloud__c':          environment,
         }
 
 
