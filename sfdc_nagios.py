@@ -82,6 +82,8 @@ def main():
     LOG.setLevel(log_level)
     LOG.addHandler(handler)
 
+
+# Read from stdin if desctiption defined as '-'
     if  args.description == '-':
         args.description = ''.join(sys.stdin.readlines())
 
@@ -103,11 +105,17 @@ def main():
     with open(args.config_file) as fp:
         config = yaml.load(fp)
 
+    if 'sfdc_organization_id' in config:
+        organizationId = config['sfdc_organization_id']
+    else:
+        organizationId = None
+
     sfdc_oauth2 = OAuth2(client_id=config['sfdc_client_id'],
                          client_secret=config['sfdc_client_secret'],
                          username=config['sfdc_username'],
                          password=config['sfdc_password'],
-                         auth_url=config['sfdc_auth_url'])
+                         auth_url=config['sfdc_auth_url'],
+                         organizationId = organizationId )
 
     environment = config['environment']
 
@@ -120,8 +128,8 @@ def main():
 
     LOG.debug('Alert_Id: {} '.format(Alert_ID))
 
-    sfdc_client = Client(sfdc_oauth2)
 
+    sfdc_client = Client(sfdc_oauth2)
 
     data = {
         'Payload__c':  json.dumps(nagios_data),
@@ -133,11 +141,15 @@ def main():
         'Comment__c':        json.dumps(nagios_data),
         'Alert_Id__c':       Alert_ID,
         'MOS_Alert_Name__c': "MA-0" ,
+        'MosAlertId__c':     "-1"
         }
 
 
-
-    new_alert = sfdc_client.create_mos_alert(data)
+    try:
+      new_alert = sfdc_client.create_mos_alert(data)
+    except Exception as E:
+       LOG.debug(E)
+       sys.exit(1)
 
     LOG.debug('New MOS_Alert status code {} '.format(new_alert.status_code))
     LOG.debug('New MOS_Alert: {} '.format(new_alert.text))
@@ -163,13 +175,17 @@ def main():
 
         # Add comment to updated alert
         comment_data['related_id__c'] = Id
+        comment_data['MosAlertId__c'] = Id
         add_comment = sfdc_client.create_mos_alert_comment(comment_data)
         LOG.debug('Add Comment status code: {} '.format(add_comment.status_code))
         LOG.debug('Add Comment data: {} '.format(add_comment.text))
     elif  (new_alert.status_code  == 201):
         # Add commnet, because MOS_Alert is LAST data and will be overriden on update
-        comment_data['related_id__c'] = new_alert.json()['id']
-        comment_data['MOS_Alert_Name__c'] = new_alert.json()['Name']
+        Id = new_alert.json()['id']
+        comment_data['related_id__c'] = Id
+        comment_data['MosAlertId__c'] = Id
+        current_alert = sfdc_client.get_mos_alert(Id).json()
+        comment_data['MOS_Alert_Name__c'] = current_alert['Name']
         add_comment = sfdc_client.create_mos_alert_comment(comment_data)
         LOG.debug('Add Comment status code: {} '.format(add_comment.status_code))
         LOG.debug('Add Comment data: {} '.format(add_comment.text))
