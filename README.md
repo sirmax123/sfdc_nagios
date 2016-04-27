@@ -19,14 +19,13 @@ Installation:
 
 ## Config file parameters
 
-sfdc_client_id: Client ID of SFDC application
-sfdc_client_secret: Client secret of SFDC application
-sfdc_username: User Name
-sfdc_password: User Password
-sfdc_auth_url: Auth URL, looks like 'https://someurl.my.salesforce.com/'
-
-environment: OpenStack env ID.
-sfdc_organization_id: SFDC Organization ID.
+*  sfdc_client_id: Client ID of SFDC application
+*  sfdc_client_secret: Client secret of SFDC application
+*  sfdc_username: User Name
+*  sfdc_password: User Password
+*  sfdc_auth_url: Auth URL, looks like 'https://someurl.my.salesforce.com/'
+*  environment: OpenStack env ID.
+*  sfdc_organization_id: SFDC Organization ID.
 
 sfdc_organization_id is used only for customer's accounts because in general username may by not global-unique. 
 So this paraneter is 'domain of visability' for username and must be configured *ONLY* for custome's account.
